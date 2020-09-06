@@ -1,0 +1,17 @@
+{
+  "name": "mcbot",
+  "version": "1.0.0",
+  "description": "MC to Discord bridge for Hypixel Guilds",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "discord.js": "^12.3.1",
+    "dotenv": "^8.2.0",
+    "mineflayer": "^2.28.1"
+  }
+}
