@@ -14,7 +14,7 @@ let next=new Date();
 let passthrough = false;
 let officers = JSON.parse(process.env.OFFICERS);
 
-const client = new discord.Client({autoReconnect: true});
+const client = new discord.Client();
 const options = {
     host: 'mc.hypixel.net',
     port: 25565,
@@ -54,7 +54,7 @@ function callEveryHour() {
     }, 1000 * 60 * 60);
 }
 
-if (date.getMinutes() === 52) { 
+if (date.getMinutes() === 52) {
     callEveryHour()
 } else {
     date.setHours(date.getHours()+1);
@@ -108,8 +108,8 @@ mc.on("message", (chatMsg) => {
             sender = splitMsg[2];
         }
         sentMsg = splitMsg2[1];
-        
-        let embed = new discord.RichEmbed()
+
+        let embed = new discord.MessageEmbed()
             .setAuthor(sender + ": " + sentMsg, "https://minotar.net/helm/" + sender);
         let rank = splitMsg[2].replace(/[\[\]']+/g,'');
         if(rank=="MVP++"){
@@ -143,8 +143,8 @@ mc.on("message", (chatMsg) => {
             sender = splitMsg[2];
         }
         sentMsg = splitMsg2[1];
-        
-        let embed = new discord.RichEmbed()
+
+        let embed = new discord.MessageEmbed()
             .setAuthor(sender + ": " + sentMsg, "https://minotar.net/helm/" + sender);
         let rank = splitMsg[2].replace(/[\[\]']+/g,'');
         if(rank=="MVP++"){
