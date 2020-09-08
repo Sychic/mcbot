@@ -2,22 +2,19 @@
 require('dotenv').config({path:__dirname+'/.env'})
 const mineflayer = require("mineflayer");
 const discord = require("discord.js");
-const fs = require('fs');
 require("colors");
-const https = require('https');
 
 //variables
 let lastMsg = {"platform":null,"user":null,"cache":null};
 const date = new Date();
 let cache, cache2;
-let next=new Date();
+let next = new Date();
 let passthrough = false;
 let officers = JSON.parse(process.env.OFFICERS);
 
 const client = new discord.Client();
 const options = {
     host: 'mc.hypixel.net',
-    port: 25565,
     version: '1.8.9',
     username: process.env.USER,
     password: process.env.PASSWORD,
@@ -40,14 +37,14 @@ let mc;
     }catch(e){
         console.error(e);
     }
-}());
+})();
 
 function callEveryHour() {
     mc.chat(`/gc Dark Auction Reminder~ (3m)`);
     date.setHours(date.getHours()+1);
     date.setMinutes(52);
     date.setSeconds(0);
-    var difference = date - new Date();
+    const difference = date - new Date();
     next=new Date(Date.now()+difference);
     setInterval(function(){
         callEveryHour();
@@ -61,7 +58,7 @@ if (date.getMinutes() === 52) {
     date.setMinutes(52);
     date.setSeconds(0);
 
-    var difference = date - new Date();
+    const difference = date - new Date();
     next=new Date(Date.now()+difference);
     setTimeout(callEveryHour, difference);
 }
@@ -81,7 +78,7 @@ mc.on("login", () => {
 mc.on("message", (chatMsg) => {
     const msg = chatMsg.toString();
     console.log("Minecraft: ".brightGreen + msg);
-    if(passthrough&&msg!=""){
+    if(passthrough&&msg!==""){
         return client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(msg);
     }
     if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
@@ -94,11 +91,11 @@ mc.on("message", (chatMsg) => {
         return;
     }
 
-    if (msg.startsWith("Guild >") && msg.includes(":") && process.env.gToggle==`true`) {
+    if ((msg.startsWith("Guild >") || msg.startsWith("Officer >")) && msg.includes(":")) {
         let splitMsg = msg.split(" ");
         if(splitMsg[2].includes(name)||splitMsg[3].includes(name)) return;
         cache=splitMsg;
-        let i = msg.search(/:{1}/);
+        let i = msg.search(/:/);
         let splitMsg2 = [msg.slice(0,i), msg.slice(i+1)];
         cache2=splitMsg2;
         let sender, sentMsg;
@@ -109,58 +106,29 @@ mc.on("message", (chatMsg) => {
         }
         sentMsg = splitMsg2[1];
 
-        let embed = new discord.MessageEmbed()
-            .setAuthor(sender + ": " + sentMsg, "https://minotar.net/helm/" + sender);
-        let rank = splitMsg[2].replace(/[\[\]']+/g,'');
-        if(rank=="MVP++"){
+        const embed = new discord.MessageEmbed()
+            .setAuthor(sender + ": " + sentMsg, "https://minotar.net/helm/" + sender)
+            .setColor("#AAAAAA");
+        const rank = splitMsg[2].replace(/[\[\]']+/g,'');
+        if(rank==="MVP++"){
             embed.setColor("#FFAA00")
-        } else if(rank=="MVP+"){
+        } else if(rank==="MVP+"){
             embed.setColor("#5555FF")
-        }else if(rank=="MVP"){
+        } else if(rank==="MVP"){
             embed.setColor("#55FFFF")
-        } else if(rank=="VIP+"){
+        } else if(rank==="VIP+"){
             embed.setColor("#00AA00")
-        } else if(rank=="VIP"){
+        } else if(rank==="VIP"){
             embed.setColor("#55FF55")
-        } else{
-            embed.setColor("#AAAAAA")
         }
-        client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(embed);
-        lastMsg={"user":sender,"platform":"minecraft","cache":embed};
-    }
-
-    if (msg.startsWith("Officer >") && msg.includes(":") && process.env.oToggle==`true`) {
-        let splitMsg = msg.split(" ");
-        if(splitMsg[2].includes(name)||splitMsg[3].includes(name)) return;
-        cache=splitMsg;
-        let i = msg.search(/:{1}/);
-        let splitMsg2 = [msg.slice(0,i), msg.slice(i+1)];
-        cache2=splitMsg2;
-        let sender, sentMsg;
-        if (splitMsg[2].includes("[")) {
-            sender = splitMsg[3];
-        } else {
-            sender = splitMsg[2];
+        let c;
+        if (msg.startsWith("G") && process.env.gToggle===`true`) {
+            c = client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL);
+        } else if (msg.startsWith("O") && process.env.oToggle===`true`) {
+            c = client.guilds.cache.get(process.env.OGUILD).channels.cache.get(process.env.OCHANNEL);
         }
-        sentMsg = splitMsg2[1];
-
-        let embed = new discord.MessageEmbed()
-            .setAuthor(sender + ": " + sentMsg, "https://minotar.net/helm/" + sender);
-        let rank = splitMsg[2].replace(/[\[\]']+/g,'');
-        if(rank=="MVP++"){
-            embed.setColor("#FFAA00")
-        } else if(rank=="MVP+"){
-            embed.setColor("#5555FF")
-        }else if(rank=="MVP"){
-            embed.setColor("#55FFFF")
-        } else if(rank=="VIP+"){
-            embed.setColor("#00AA00")
-        } else if(rank=="VIP"){
-            embed.setColor("#55FF55")
-        } else{
-            embed.setColor("#AAAAAA")
-        }
-        client.guilds.cache.get(process.env.OGUILD).channels.cache.get(process.env.OCHANNEL).send(embed);
+        if (c === undefined) return;
+        c.send(embed);
         lastMsg={"user":sender,"platform":"minecraft","cache":embed};
     }
 });
@@ -193,12 +161,12 @@ client.on("message", (message) => {
         return;
     }
     if(message.content.startsWith(process.env.PREFIX)) return;
-    if (message.channel.id == process.env.CHANNEL){
+    if (message.channel.id === process.env.CHANNEL){
         console.log("Discord: ".blue + message.author.username + ": " + message.content);
-        let name = (message.author.id==342863217892261888) ? "Nahlee" :(message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
+        let name = (message.author.id === "342863217892261888") ? "Nahlee" :(message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
         mc.chat(`/gc (${name}): ${message.cleanContent}`);
         lastMsg={"user":name,"platform":"discord",cache:"message.content"};
-    }else if (message.channel.id == process.env.OCHANNEL){
+    }else if (message.channel.id === process.env.OCHANNEL){
         console.log("Discord: ".blue + message.author.username + ": " + message.content);
         let name = (message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
         mc.chat(`/oc (${name}): ${message.cleanContent}`);
@@ -206,4 +174,4 @@ client.on("message", (message) => {
     }
 });
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN).then();
