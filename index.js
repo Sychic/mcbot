@@ -163,7 +163,7 @@ client.on("message", (message) => {
     if(message.content.startsWith(process.env.PREFIX)) return;
     if (message.channel.id === process.env.CHANNEL){
         console.log("Discord: ".blue + message.author.username + ": " + message.content);
-        let name = (message.author.id === "342863217892261888") ? "Nahlee" :(message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
+        let name = (message.author.id === "342863217892261888") ? "Nahlee" :(message.author.id === "617450312625684523") ? "Isabel" :(message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
         mc.chat(`/gc (${name}): ${message.cleanContent}`);
         lastMsg={"user":name,"platform":"discord",cache:"message.content"};
     }else if (message.channel.id === process.env.OCHANNEL){
