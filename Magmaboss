@@ -1,0 +1,23 @@
+function callEvery2Hour() {
+    mc.chat(`/gc Magma Boss Reminder~ (3m)`);
+    date.setHours(date.getHours()+2);
+    date.setMinutes(117);
+    date.setSeconds(0);
+    const difference = date - new Date();
+    next=new Date(Date.now()+difference);
+    setInterval(function(){
+        callEvery2Hour();
+    }, 1000 * 120 * 120);
+}
+
+if (date.getMinutes() === 117) {
+    callEvery2Hour()
+} else {
+    date.setHours(date.getHours()+2);
+    date.setMinutes(117);
+    date.setSeconds(0);
+
+    const difference = date - new Date();
+    next=new Date(Date.now()+difference);
+    setTimeout(callEvery2Hour, difference);
+}
