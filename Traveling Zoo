@@ -1,0 +1,22 @@
+function callEvery62Hour() {
+    mc.chat(`/gc The Traveling Zoo is almost here!~ (3m)`);
+    date.setHours(date.getHours()+62);
+    date.setMinutes(3717);
+    date.setSeconds(0);
+    const difference = date - new Date();
+    next=new Date(Date.now()+difference);
+    setInterval(function(){
+        callEvery62Hour();
+    }, 1000 * 3720 * 3720);
+}
+
+if (date.getMinutes() === 3720) {
+    callEvery62Hour()
+} else {
+    date.setHours(date.getHours()+62);
+    date.setMinutes(0);
+    date.setSeconds(0);
+
+    const difference = date - new Date();
+    next=new Date(Date.now()+difference);
+    setTimeout(callEvery62Hour, difference);
