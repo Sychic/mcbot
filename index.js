@@ -2,9 +2,13 @@
 require('dotenv').config({path:__dirname+'/.env'})
 const mineflayer = require("mineflayer");
 const discord = require("discord.js");
+const ejs = require("emoji-js");
 require("colors");
 
 //variables
+const emojiConverter = new ejs();
+emojiConverter.text_mode = true;
+emojiConverter.colons_mode = true;
 let lastMsg = {"platform":null,"user":null,"cache":null};
 const date = new Date();
 let cache, cache2;
@@ -138,6 +142,22 @@ client.on("ready", () => {
     console.log("Discord: Logged in.".bgBlue);
 });
 
+function processDiscordMsg(message) {
+    const name = (message.author.id === "342863217892261888") ? "Nahlee" :(message.author.id === "617450312625684523") ? "Isabel" :(message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
+    const emoteregex = /(:[^:\s]+:|<:[^:\s]+:[0-9]+>|<a:[^:\s]+:[0-9]+>)/g;
+    let msg = emojiConverter.replace_unified(`(${name}): ` + message.cleanContent);
+    let m = msg.match(emoteregex);
+    if (m !== null) {
+        m.forEach((x) => {
+            let emotename = x.split(":")[1].split(":")[0];
+            msg = msg.replace(x, `:${emotename}:`)
+        });
+    }
+    msg = msg.replace(/​/g, ""); // d.js cleanContent inserts ZWSP for some reason
+    msg = msg.replace(/ez/g, "eࠀz");
+    return msg;
+}
+
 client.on("message", (message) => {
     if((message.channel.id !== process.env.CHANNEL && message.channel.id !== process.env.OCHANNEL )|| message.author.bot) return;
     if(officers.includes(message.author.id)&&message.content.startsWith(`${process.env.PREFIX}last`)){
@@ -161,17 +181,15 @@ client.on("message", (message) => {
         return;
     }
     if(message.content.startsWith(process.env.PREFIX)) return;
+    if(message.content === "") return;
+    let processedMsg = processDiscordMsg(message);
+    console.log("Discord: ".blue + message.author.username + ": " + message.content);
     if (message.channel.id === process.env.CHANNEL){
-        console.log("Discord: ".blue + message.author.username + ": " + message.content);
-        let name = (message.author.id === "342863217892261888") ? "Nahlee" :(message.author.id === "617450312625684523") ? "Isabel" :(message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
-        mc.chat(`/gc (${name}): ${message.cleanContent}`);
-        lastMsg={"user":name,"platform":"discord",cache:"message.content"};
+        mc.chat("/gc " + processedMsg);
     }else if (message.channel.id === process.env.OCHANNEL){
-        console.log("Discord: ".blue + message.author.username + ": " + message.content);
-        let name = (message.guild.member(message.author).displayName.length>16) ? message.author.username : message.guild.member(message.author).displayName;
-        mc.chat(`/oc (${name}): ${message.cleanContent}`);
-        lastMsg={"user":name,"platform":"discord",cache:"message.content"};
+        mc.chat("/oc " + processedMsg);
     }
+    lastMsg={"user":name,"platform":"discord",cache:"message.content"};
 });
 
 client.login(process.env.TOKEN).then();
