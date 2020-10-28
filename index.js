@@ -74,7 +74,7 @@ mc.on("login", () => {
     name = mc._client.session.selectedProfile.name;
     setTimeout(() => {
         console.log("Sending to limbo.");
-        mc.chat("/achat \u00a7c<3");
+        mc.chat("/limbo");
     }, 1000);
     // mc.chat("/gc Logged in")
 });
@@ -87,7 +87,7 @@ mc.on("message", (chatMsg) => {
     }
     if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
         console.log("Sending to limbo.");
-        mc.chat("/achat \u00a7ca");
+        mc.chat("/limbo");
         return;
     }
     if(msg.startsWith("From")&&msg.includes(":")){
