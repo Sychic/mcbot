@@ -85,11 +85,6 @@ mc.on("message", (chatMsg) => {
     if(passthrough&&msg!==""){
         return client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(msg);
     }
-    if (msg.endsWith(" joined the lobby!") && msg.includes("[MVP+")) {
-        console.log("Sending to limbo.");
-        mc.chat("/achat \u00a7ca");
-        return;
-    }
     if(msg.startsWith("From")&&msg.includes(":")){
         client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.PMS).send(msg);
         return;
@@ -134,7 +129,9 @@ mc.on("message", (chatMsg) => {
         if (c === undefined) return;
         c.send(embed);
         lastMsg={"user":sender,"platform":"minecraft","cache":embed};
+        return;
     }
+    mc.chat("/achat \u00a7ca");
 });
 
 // discord bot stuff vv
