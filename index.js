@@ -50,15 +50,22 @@ function callEveryHour() {
     date.setSeconds(0);
     const difference = date - new Date();
     next=new Date(Date.now()+difference);
-    setInterval(function(){
+    setTimeout(function() {
+        mc.chat(`/gc Jacob's Contest Reminder~ (3m)`);
+    }, 20 * 60000); // 20 minutes to 3 minutes before Contest (Contest is always 20 after DA)
+    setTimeout(function(){
         callEveryHour();
-    }, 1000 * 60 * 60);
+    }, 60 * 60000); // 60 minutes
 }
 
 if (date.getMinutes() === 52) {
     callEveryHour()
 } else {
-    date.setHours(date.getHours()+1);
+    if (date.getMinutes() > 52) {
+        date.setHours(date.getHours() + 1);
+    } else {
+        date.setHours(date.getHours());
+    }
     date.setMinutes(52);
     date.setSeconds(0);
 
