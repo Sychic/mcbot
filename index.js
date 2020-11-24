@@ -16,7 +16,7 @@ let next = new Date();
 let passthrough = false;
 let officers = JSON.parse(process.env.OFFICERS);
 
-const client = new discord.Client();
+const client = new discord.Client({ ws : { intents : ['GUILDS','GUILD_MESSAGES']}});
 const options = {
     host: 'mc.hypixel.net',
     version: '1.8.9',
@@ -128,9 +128,9 @@ mc.on("message", (chatMsg) => {
             embed.setColor("#55FF55")
         }
         let c;
-        if (msg.startsWith("G") && process.env.gToggle===`true`) {
+        if (msg.startsWith("Guild >") && msg.includes(":") && process.env.gToggle==`true`) {
             c = client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL);
-        } else if (msg.startsWith("O") && process.env.oToggle===`true`) {
+        } else if (msg.startsWith("Officer >") && msg.includes(":") && process.env.oToggle==`true`) {
             c = client.guilds.cache.get(process.env.OGUILD).channels.cache.get(process.env.OCHANNEL);
         }
         if (c === undefined) return;
