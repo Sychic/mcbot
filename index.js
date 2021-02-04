@@ -43,7 +43,7 @@ let mc;
         console.log("Logging in.");
         mc = mineflayer.createBot(options);
         mc._client.once("session", session => options.session = session);
-        mc.once("end", () => {
+        mc.once("end", async () => {
             await wait(60000);
             console.log("Connection failed. Retrying..");
             init();
