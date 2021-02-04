@@ -209,27 +209,34 @@ function processDiscordMsg(message) {
 
 client.on("message", (message) => {
     if ((message.channel.id !== process.env.CHANNEL && message.channel.id !== process.env.OCHANNEL) || message.author.bot) return;
-    if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}last`)) {
-        message.channel.send(JSON.stringify(lastMsg));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}cache2`)) {
-        message.channel.send(JSON.stringify(cache2));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}cache`)) {
-        message.channel.send(JSON.stringify(cache));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}next`)) {
-        message.channel.send(JSON.stringify(next));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}comm`)) {
-        mc.chat(message.content.substring(6));
-        passthrough = true;
-        setTimeout(() => {
-            passthrough = false;
-        }, 250);
+    if (message.content.startsWith(process.env.PREFIX)) {
+        const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
+        const command = args.shift().toLowerCase();
+        if (officers.includes(message.author.id)) {
+            switch (command) {
+                case "last":
+                    message.channel.send(JSON.stringify(lastMsg));
+                    break;
+                case "cache2":
+                    message.channel.send(JSON.stringify(cache2));
+                    break;
+                case "cache":
+                    message.channel.send(JSON.stringify(cache));
+                    break;
+                case "next":
+                    message.channel.send(JSON.stringify(next));
+                    break;
+                case "comm":
+                    mc.chat(message.content.slice(process.env.PREFIX.length + command.length + 1));
+                    passthrough = true;
+                    setTimeout(() => {
+                        passthrough = false;
+                    }, 250);
+                    break;
+            }
+        }
         return;
     }
-    if (message.content.startsWith(process.env.PREFIX)) return;
     if (message.content === "") return;
     let processedMsg = processDiscordMsg(message);
     console.log("Discord: ".blue + message.author.username + ": " + message.content);
