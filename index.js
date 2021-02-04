@@ -38,16 +38,15 @@ const options = {
 
 // minecraft bot stuff vv
 let mc;
-(function init() {
+(async function init() {
     try {
         console.log("Logging in.");
         mc = mineflayer.createBot(options);
         mc._client.once("session", session => options.session = session);
         mc.once("end", () => {
-            setTimeout(() => {
-                console.log("Connection failed. Retrying..");
-                init();
-            }, 60000);
+            await wait(60000);
+            console.log("Connection failed. Retrying..");
+            init();
         });
 
     } catch (e) {
@@ -62,10 +61,10 @@ function callEveryHour() {
     date.setSeconds(0);
     const difference = date - new Date();
     next = new Date(Date.now() + difference);
-    setTimeout(function () {
+    setTimeout(() => {
         mc.chat(`/gc Jacob's Contest Reminder~ (3m)`);
     }, 20 * 60000); // 20 minutes to 3 minutes before Contest (Contest is always 20 after DA)
-    setTimeout(function () {
+    setTimeout(() => {
         callEveryHour();
     }, 60 * 60000); // 60 minutes
 }
