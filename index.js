@@ -207,15 +207,18 @@ mc.on("message", async (chatMsg) => {
                 if (!inParty) {
                     inParty = true;
                     lastPartied = username;
+                  
                     await wait(200);
                     mc.chat(`/p join ${username}`);
                     await wait(200);
                     mc.chat(`/pc Hi ${username}! Please queue for your dungeon. I will leave the party in 15 seconds.`);
                     await wait(15000);
-                    if (lastPartied === username) {
+
+                  if (lastPartied === username) {
                         mc.chat("/p leave");
                         inParty = false;
                     } 
+
                 } else {
                     await wait(200);
                     mc.chat(`/msg ${username} Sorry! I'm currently helping someone else out! Please party me again in 15 seconds.`);
