@@ -8,6 +8,7 @@ const Discord = require("discord.js");
 const ejs = require("emoji-js");
 require("colors");
 const wait = require("util").promisify(setTimeout);
+const axios = require("axios").default;
 
 //variables
 const emojiConverter = new ejs();
@@ -85,6 +86,29 @@ if (date.getMinutes() === 52) {
     setTimeout(callEveryHour, difference);
 }
 
+let lowestBin = {};
+
+setInterval(getLowestBinPrices, 120 * 1000)
+
+async function getLowestBinPrices() {
+    let req = await axios.get("https://moulberry.codes/lowestbin.json");
+    if (typeof req.data === "object") {
+        lowestBin = req.data;
+    }
+}
+
+async function getLowestBinForItem(query = "") {
+    if (Object.keys(lowestBin).length === 0) {
+        await getLowestBinPrices();
+    }
+    if (query === "") return null;
+    query = require("autocorrect")({words: Object.keys(lowestBin)})(query.replace(" ", "_").toUpperCase());
+    return {
+        item: query,
+        price: lowestBin[query]
+    };
+}
+
 let uuid;
 let name;
 mc.on("login", async () => {
@@ -97,6 +121,7 @@ mc.on("login", async () => {
 });
 
 let inParty = false;
+let lastPartied = "";
 mc.on("message", async (chatMsg) => {
     const msg = chatMsg.toString();
     console.log("Minecraft: ".brightGreen + msg);
@@ -104,6 +129,27 @@ mc.on("message", async (chatMsg) => {
         return client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(msg);
     }
     if (msg.startsWith("From") && msg.includes(":")) {
+        let usernameMatcher = msg.match(/ (\w+?):/);
+        if (usernameMatcher) {
+            let username = usernameMatcher[1];
+            const args = msg.substring(msg.indexOf(":") + 1).trim().split(/ +/g);
+            const command = args.shift().toLowerCase();
+            if (command === "lbin") {
+                if (!args[0]) {
+                    await wait(250);
+                    mc.chat(`/msg ${username} You need to provide an item to lookup the price for!`);
+                    return;
+                }
+                let data = await getLowestBinForItem(args.join(" "));
+                if (data === null) {
+                    await wait(250);
+                    mc.chat(`/msg ${username} I was unable to get the lowest BIN prices.`);
+                    return;
+                }
+                mc.chat(`/msg ${username} The lowest BIN price for ${data.item} is ${data.price.toLocaleString()}.`);
+                return;
+            }
+        }
         client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.PMS).send(msg);
         return;
     }
@@ -160,13 +206,19 @@ mc.on("message", async (chatMsg) => {
             if (username) {
                 if (!inParty) {
                     inParty = true;
+                    lastPartied = username;
+                  
                     await wait(200);
                     mc.chat(`/p join ${username}`);
                     await wait(200);
                     mc.chat(`/pc Hi ${username}! Please queue for your dungeon. I will leave the party in 15 seconds.`);
                     await wait(15000);
-                    mc.chat("/p leave");
-                    inParty = false;
+
+                  if (lastPartied === username) {
+                        mc.chat("/p leave");
+                        inParty = false;
+                    } 
+
                 } else {
                     await wait(200);
                     mc.chat(`/msg ${username} Sorry! I'm currently helping someone else out! Please party me again in 15 seconds.`);
@@ -209,27 +261,34 @@ function processDiscordMsg(message) {
 
 client.on("message", (message) => {
     if ((message.channel.id !== process.env.CHANNEL && message.channel.id !== process.env.OCHANNEL) || message.author.bot) return;
-    if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}last`)) {
-        message.channel.send(JSON.stringify(lastMsg));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}cache2`)) {
-        message.channel.send(JSON.stringify(cache2));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}cache`)) {
-        message.channel.send(JSON.stringify(cache));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}next`)) {
-        message.channel.send(JSON.stringify(next));
-        return;
-    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}comm`)) {
-        mc.chat(message.content.substring(6));
-        passthrough = true;
-        setTimeout(() => {
-            passthrough = false;
-        }, 250);
+    if (message.content.startsWith(process.env.PREFIX)) {
+        const args = message.content.slice(process.env.PREFIX.length).trim().split(" ");
+        const command = args.shift().toLowerCase();
+        if (officers.includes(message.author.id)) {
+            switch (command) {
+                case "last":
+                    message.channel.send(JSON.stringify(lastMsg));
+                    break;
+                case "cache2":
+                    message.channel.send(JSON.stringify(cache2));
+                    break;
+                case "cache":
+                    message.channel.send(JSON.stringify(cache));
+                    break;
+                case "next":
+                    message.channel.send(JSON.stringify(next));
+                    break;
+                case "comm":
+                    mc.chat(args.join(" "));
+                    passthrough = true;
+                    setTimeout(() => {
+                        passthrough = false;
+                    }, 250);
+                    break;
+            }
+        }
         return;
     }
-    if (message.content.startsWith(process.env.PREFIX)) return;
     if (message.content === "") return;
     let processedMsg = processDiscordMsg(message);
     console.log("Discord: ".blue + message.author.username + ": " + message.content);
