@@ -43,7 +43,7 @@ let mc;
         console.log("Logging in.");
         mc = mineflayer.createBot(options);
         mc._client.once("session", session => options.session = session);
-        mc.once("end", () => {
+        mc.once("end", async () => {
             await wait(60000);
             console.log("Connection failed. Retrying..");
             init();
@@ -97,6 +97,7 @@ mc.on("login", async () => {
 });
 
 let inParty = false;
+let lastPartied = "";
 mc.on("message", async (chatMsg) => {
     const msg = chatMsg.toString();
     console.log("Minecraft: ".brightGreen + msg);
@@ -160,13 +161,16 @@ mc.on("message", async (chatMsg) => {
             if (username) {
                 if (!inParty) {
                     inParty = true;
+                    lastPartied = username;
                     await wait(200);
                     mc.chat(`/p join ${username}`);
                     await wait(200);
                     mc.chat(`/pc Hi ${username}! Please queue for your dungeon. I will leave the party in 15 seconds.`);
                     await wait(15000);
-                    mc.chat("/p leave");
-                    inParty = false;
+                    if (lastPartied === username) {
+                        mc.chat("/p leave");
+                        inParty = false;
+                    } 
                 } else {
                     await wait(200);
                     mc.chat(`/msg ${username} Sorry! I'm currently helping someone else out! Please party me again in 15 seconds.`);
@@ -210,7 +214,7 @@ function processDiscordMsg(message) {
 client.on("message", (message) => {
     if ((message.channel.id !== process.env.CHANNEL && message.channel.id !== process.env.OCHANNEL) || message.author.bot) return;
     if (message.content.startsWith(process.env.PREFIX)) {
-        const args = message.content.slice(process.env.PREFIX.length).trim().split(/ +/g);
+        const args = message.content.slice(process.env.PREFIX.length).trim().split(" ");
         const command = args.shift().toLowerCase();
         if (officers.includes(message.author.id)) {
             switch (command) {
@@ -227,7 +231,7 @@ client.on("message", (message) => {
                     message.channel.send(JSON.stringify(next));
                     break;
                 case "comm":
-                    mc.chat(message.content.slice(process.env.PREFIX.length + command.length + 1));
+                    mc.chat(args.join(" "));
                     passthrough = true;
                     setTimeout(() => {
                         passthrough = false;
