@@ -8,6 +8,7 @@ const Discord = require("discord.js");
 const ejs = require("emoji-js");
 require("colors");
 const wait = require("util").promisify(setTimeout);
+const axios = require("axios").default;
 
 //variables
 const emojiConverter = new ejs();
@@ -85,6 +86,29 @@ if (date.getMinutes() === 52) {
     setTimeout(callEveryHour, difference);
 }
 
+let lowestBin = {};
+
+setInterval(getLowestBinPrices, 120 * 1000)
+
+async function getLowestBinPrices() {
+    let req = await axios.get("https://moulberry.codes/lowestbin.json");
+    if (typeof req.data === "object") {
+        lowestBin = req.data;
+    }
+}
+
+async function getLowestBinForItem(query = "") {
+    if (Object.keys(lowestBin).length === 0) {
+        await getLowestBinPrices();
+    }
+    if (query === "") return null;
+    query = require("autocorrect")({words: Object.keys(lowestBin)})(query.replace(" ", "_").toUpperCase());
+    return {
+        item: query,
+        price: lowestBin[query]
+    };
+}
+
 let uuid;
 let name;
 mc.on("login", async () => {
@@ -105,6 +129,27 @@ mc.on("message", async (chatMsg) => {
         return client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(msg);
     }
     if (msg.startsWith("From") && msg.includes(":")) {
+        let usernameMatcher = msg.match(/ (\w+?):/);
+        if (usernameMatcher) {
+            let username = usernameMatcher[1];
+            const args = msg.substring(msg.indexOf(":") + 1).trim().split(/ +/g);
+            const command = args.shift().toLowerCase();
+            if (command === "lbin") {
+                if (!args[0]) {
+                    await wait(250);
+                    mc.chat(`/msg ${username} You need to provide an item to lookup the price for!`);
+                    return;
+                }
+                let data = await getLowestBinForItem(args.join(" "));
+                if (data === null) {
+                    await wait(250);
+                    mc.chat(`/msg ${username} I was unable to get the lowest BIN prices.`);
+                    return;
+                }
+                mc.chat(`/msg ${username} The lowest BIN price for ${data.item} is ${data.price.toLocaleString()}.`);
+                return;
+            }
+        }
         client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.PMS).send(msg);
         return;
     }
