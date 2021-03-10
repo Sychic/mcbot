@@ -153,35 +153,35 @@ mc.on("message", async (chatMsg) => {
         };
         return;
     }
-    if (msg.includes("has invited you to join their party!")) {
-        let usernameRegex = /(?:\[.+?\] )?(\w+)/;
-        if (usernameRegex.test(msg)) {
-            let username = usernameRegex.exec(msg)[1];
-            if (username) {
-                if (!inParty) {
-                    inParty = true;
-                    await wait(200);
-                    mc.chat(`/p join ${username}`);
-                    await wait(200);
-                    mc.chat(`/pc Hi ${username}! Please queue for your dungeon. I will leave the party in 15 seconds.`);
-                    await wait(15000);
-                    mc.chat("/p leave");
-                    inParty = false;
-                } else {
-                    await wait(200);
-                    mc.chat(`/msg ${username} Sorry! I'm currently helping someone else out! Please party me again in 15 seconds.`);
-                }
-            }
-        }
-    } else if (msg.includes("warped the party to a SkyBlock dungeon!")) {
-        await wait(500);
-        mc.chat("/pc Good luck!");
-        await wait(200);
-        mc.chat("/p leave");
-        inParty = false;
-    } else if (msg.includes("has disbanded the party!") || msg.includes("You are not in a party.")) {
-        inParty = false;
-    }
+    // if (msg.includes("has invited you to join their party!")) {
+    //     let usernameRegex = /(?:\[.+?\] )?(\w+)/;
+    //     if (usernameRegex.test(msg)) {
+    //         let username = usernameRegex.exec(msg)[1];
+    //         if (username) {
+    //             if (!inParty) {
+    //                 inParty = true;
+    //                 await wait(200);
+    //                 mc.chat(`/p join ${username}`);
+    //                 await wait(200);
+    //                 mc.chat(`/pc Hi ${username}! Please queue for your dungeon. I will leave the party in 15 seconds.`);
+    //                 await wait(15000);
+    //                 mc.chat("/p leave");
+    //                 inParty = false;
+    //             } else {
+    //                 await wait(200);
+    //                 mc.chat(`/msg ${username} Sorry! I'm currently helping someone else out! Please party me again in 15 seconds.`);
+    //             }
+    //         }
+    //     }
+    // } else if (msg.includes("warped the party to a SkyBlock dungeon!")) {
+    //     await wait(500);
+    //     mc.chat("/pc Good luck!");
+    //     await wait(200);
+    //     mc.chat("/p leave");
+    //     inParty = false;
+    // } else if (msg.includes("has disbanded the party!") || msg.includes("You are not in a party.")) {
+    //     inParty = false;
+    // }
     await wait(200);
     mc.chat("/achat \u00a7c<3");
 });
