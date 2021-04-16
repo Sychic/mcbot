@@ -192,7 +192,7 @@ client.on("ready", () => {
 });
 
 function processDiscordMsg(message) {
-    const name = (message.author.id === "342863217892261888") ? "Nahlee" : (message.author.id === "617450312625684523") ? "Isabel" : (message.guild.member(message.author).displayName.length > 16) ? message.author.username : message.guild.member(message.author).displayName;
+    const name = /*(message.author.id === "342863217892261888") ? "Nahlee" :*/ (message.author.id === "617450312625684523") ? "Isabel" : (message.guild.member(message.author).displayName.length > 16) ? message.author.username : message.guild.member(message.author).displayName;
     const emoteregex = /(:[^:\s]+:|<:[^:\s]+:[0-9]+>|<a:[^:\s]+:[0-9]+>)/g;
     let msg = emojiConverter.replace_unified(`(${name}): ` + message.cleanContent);
     let m = msg.match(emoteregex);
