@@ -3,6 +3,7 @@ const path = require("path");
 require('dotenv').config({
     path: path.join(__dirname, '.env')
 });
+const mineflayer = require("mineflayer");
 const Discord = require("discord.js");
 const ejs = require("emoji-js");
 const handler = require('./handler')
