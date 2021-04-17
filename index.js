@@ -3,7 +3,6 @@ const path = require("path");
 require('dotenv').config({
     path: path.join(__dirname, '.env')
 });
-const mineflayer = require("mineflayer");
 const Discord = require("discord.js");
 const ejs = require("emoji-js");
 const handler = require('./handler')
@@ -103,10 +102,10 @@ mc.on("message", async (chatMsg) => {
     const msg = chatMsg.toString();
     console.log("Minecraft: ".brightGreen + msg);
     if (passthrough && msg !== "") {
-        // return client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(msg);
+        return client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL).send(msg);
     }
     if (msg.startsWith("From") && msg.includes(":")) {
-        // client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.PMS).send(msg);
+        client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.PMS).send(msg);
         const prefix = process.env.MCPREFIX || process.env.PREFIX
         if (msg.includes(prefix)) {
             // copying this code even tho it sucks bc i dont want to rewrite it rn
@@ -164,9 +163,9 @@ mc.on("message", async (chatMsg) => {
         }
         let c;
         if (msg.startsWith("Guild >") && msg.includes(":") && process.env.gToggle == `true`) {
-            // c = client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL);
+            c = client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL);
         } else if (msg.startsWith("Officer >") && msg.includes(":") && process.env.oToggle == `true`) {
-            // c = client.guilds.cache.get(process.env.OGUILD).channels.cache.get(process.env.OCHANNEL);
+            c = client.guilds.cache.get(process.env.OGUILD).channels.cache.get(process.env.OCHANNEL);
         }
         if (c === undefined) return;
         c.send(embed);
