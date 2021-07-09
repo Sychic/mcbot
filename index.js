@@ -23,6 +23,7 @@ let cache, cache2;
 let next = new Date();
 let passthrough = false;
 let officers = JSON.parse(process.env.OFFICERS);
+let delay = 60_000
 
 const client = new Discord.Client({
     ws: {
@@ -44,11 +45,9 @@ let mc;
         mc = mineflayer.createBot(options);
         mc._client.once("session", session => options.session = session);
         mc.once("end", async () => {
-            await wait(60000);
-            console.log("Connection failed. Retrying..");
-            init();
+            await wait(delay);
+            console.log("Logging in again");
         });
-
     } catch (e) {
         console.error(e);
     }
@@ -87,12 +86,15 @@ if (date.getMinutes() === 52) {
 
 let uuid;
 let name;
-mc.on("login", async () => {
+mc.once("login", async () => {
     uuid = mc._client.session.selectedProfile.id;
     name = mc._client.session.selectedProfile.name;
     await wait(1000);
     console.log("Sending to limbo.");
     mc.chat("/achat \u00a7c<3");
+    let c = client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.CHANNEL);
+    if (c === undefined) return;
+    c.send("Logged in!");
     // mc.chat("/gc Logged in")
 });
 
@@ -228,6 +230,18 @@ client.on("message", (message) => {
             passthrough = false;
         }, 250);
         return;
+    } else if (officers.includes(message.author.id) && message.content.startsWith(`${process.env.PREFIX}relog`) && message.content.split(" ").length > 1) {
+        let arg = message.content.split(" ")
+        arg.shift()
+        let parsedelay = 1_000
+        try {
+            parsedelay = Math.max(parseInt(arg[0]), 1_000)
+            message.reply(`Relogging with ${parsedelay}ms of delay`)
+        } catch (error) {
+            message.reply("Invalid delay")
+        }
+        delay = parsedelay
+        mc.quit("Relogging")
     }
     if (message.content.startsWith(process.env.PREFIX)) return;
     if (message.content === "") return;
