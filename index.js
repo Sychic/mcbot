@@ -6,6 +6,8 @@ require('dotenv').config({
 const mineflayer = require("mineflayer");
 const Discord = require("discord.js");
 const ejs = require("emoji-js");
+const handler = require('./handler')
+handler.init()
 require("colors");
 const wait = require("util").promisify(setTimeout);
 
@@ -107,6 +109,24 @@ mc.on("message", async (chatMsg) => {
     }
     if (msg.startsWith("From") && msg.includes(":")) {
         client.guilds.cache.get(process.env.GUILD).channels.cache.get(process.env.PMS).send(msg);
+        const prefix = process.env.MCPREFIX || process.env.PREFIX
+        if (msg.includes(prefix)) {
+            // copying this code even tho it sucks bc i dont want to rewrite it rn
+            let splitMsg = msg.split(" ");
+            if (splitMsg[1].includes(name) || splitMsg[2].includes(name)) return;
+            cache = splitMsg;
+            let i = msg.search(/:/);
+            let splitMsg2 = [msg.slice(0, i), msg.slice(i + 1)];
+            cache2 = splitMsg2;
+            let sender, sentMsg;
+            if (splitMsg[1].includes("[")) {
+                sender = splitMsg[2].slice(0, -1);
+            } else {
+                sender = splitMsg[1].slice(0, -1);
+            }
+            sentMsg = splitMsg2[1];
+            handler(mc, sentMsg.trim(), sender, prefix, 'dm')
+        }
         return;
     }
 
@@ -124,6 +144,10 @@ mc.on("message", async (chatMsg) => {
             sender = splitMsg[2];
         }
         sentMsg = splitMsg2[1];
+        if (sentMsg.trim().startsWith(prefix)) {
+            const prefix = process.env.MCPREFIX || process.env.PREFIX
+            handler(mc, sentMsg.trim(), sender, prefix, 'gc')
+        }
 
         const embed = new Discord.MessageEmbed()
             .setAuthor(sender + ": " + sentMsg, "https://minotar.net/helm/" + sender)
